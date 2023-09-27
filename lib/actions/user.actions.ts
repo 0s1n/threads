@@ -1,10 +1,24 @@
 "use server";
-
-import { connectToDB } from "../mongoose";
+//Video 5:20
+import { FilterQuery, SortOrder } from "mongoose";
 import { revalidatePath } from "next/cache";
+import { connectToDB } from "../mongoose";
 import User from "../models/user.model";
 import Thread from "../models/thread.model";
-import { FilterQuery, SortOrder } from "mongoose";
+import Community from "../models/community.model";
+
+export async function fetchUser(userId: string) {
+	try {
+		connectToDB();
+
+		return await User.findOne({ id: userId }).populate({
+			path: "communities",
+			model: Community,
+		});
+	} catch (error: any) {
+		throw new Error(`Failed to fetch user: ${error.message}`);
+	}
+}
 
 export interface IUpdateUser {
 	userId: string;
@@ -37,20 +51,6 @@ export async function updateUser({
 		}
 	} catch (error: any) {
 		throw new Error(`Failed to create/update user: ${error.message}`);
-	}
-}
-
-export async function fetchUser(userId: string) {
-	try {
-		connectToDB();
-
-		return await User.findOne({ id: userId });
-		// .populate({
-		// 	path: "communities",
-		// 	model: Community,
-		// });
-	} catch (error: any) {
-		throw new Error(`Failed to fetch user: ${error.message}`);
 	}
 }
 
